@@ -1,0 +1,14 @@
+inputSet:
+  name: Build_localstack_in_ci_1684161347748-pr-trigger-input-set
+  identifier: Build_localstack_in_ci_1684161347748prtriggerinputset
+  orgIdentifier: default
+  projectIdentifier: localstackinci
+  pipeline:
+    identifier: Build_localstack_in_ci_1684161347748
+    properties:
+      ci:
+        codebase:
+          build:
+            type: PR
+            spec:
+              number: <+trigger.prNumber>
