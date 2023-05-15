@@ -1,0 +1,33 @@
+pipeline:
+  name: Build localstack-in-ci
+  identifier: Build_localstack_in_ci_1684161347748
+  projectIdentifier: localstackinci
+  orgIdentifier: default
+  stages:
+    - stage:
+        name: Build
+        identifier: Build
+        type: CI
+        spec:
+          cloneCodebase: true
+          infrastructure:
+            type: KubernetesHosted
+            spec:
+              identifier: k8s-hosted-infra
+          execution:
+            steps:
+              - step:
+                  type: Run
+                  name: Echo Welcome Message
+                  identifier: Echo_Welcome_Message
+                  spec:
+                    connectorRef: account.harnessImage
+                    image: alpine
+                    shell: Sh
+                    command: echo "Welcome to Harness CI"
+  properties:
+    ci:
+      codebase:
+        connectorRef: account.Github_OAuth_1684161284388
+        repoName: HarshCasper/localstack-in-ci
+        build: <+input>
