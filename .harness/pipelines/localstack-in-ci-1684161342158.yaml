@@ -3,31 +3,55 @@ pipeline:
   identifier: Build_localstack_in_ci_1684161347748
   projectIdentifier: localstackinci
   orgIdentifier: default
+  tags: {}
   stages:
     - stage:
-        name: Build
-        identifier: Build
+        name: Stage 1
+        identifier: Stage_1
+        description: ""
         type: CI
         spec:
-          cloneCodebase: true
-          infrastructure:
-            type: KubernetesHosted
-            spec:
-              identifier: k8s-hosted-infra
+          cloneCodebase: false
+          platform:
+            os: Linux
+            arch: Amd64
+          runtime:
+            type: Cloud
+            spec: {}
           execution:
             steps:
               - step:
-                  type: Run
-                  name: Echo Welcome Message
-                  identifier: Echo_Welcome_Message
+                  type: Background
+                  name: localstack
+                  identifier: localstack
                   spec:
-                    connectorRef: account.harnessImage
-                    image: alpine
+                    connectorRef: harnessImage
+                    image: localstack/localstack:latest
                     shell: Sh
-                    command: echo "Welcome to Harness CI"
-  properties:
-    ci:
-      codebase:
-        connectorRef: account.Github_OAuth_1684161284388
-        repoName: HarshCasper/localstack-in-ci
-        build: <+input>
+              - step:
+                  type: Run
+                  name: localstack health
+                  identifier: localstack_health
+                  spec:
+                    connectorRef: harnessImage 
+                    image: curlimages/curl:7.83.1
+                    shell: Sh
+                    command: until curl --fail --silent --max-time 1 http://localstack:4566/health; do sleep 2; done
+              - step:
+                  type: Run
+                  name: Install AWS CLI
+                  identifier: install_aws_cli
+                  spec:
+                    shell: Sh
+                    command: pip install awscli-local[ver1]
+              - step:
+                  type: Run
+                  name: Run AWS CLI tests
+                  identifier: run_cli_tests
+                  spec:
+                    shell: Sh
+                    command: |
+                      aws --endpoint http://localhost.localstack.cloud:4566 s3 mb s3://test
+                      echo "hello world" > /tmp/hello-world
+                      aws --endpoint http://localhost.localstack.cloud:4566 s3 cp /tmp/hello-world s3://test/hello-world
+                      aws --endpoint http://localhost.localstack.cloud:4566 s3 ls s3://test/
