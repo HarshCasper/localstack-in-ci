@@ -1,0 +1,14 @@
+inputSet:
+  name: Build_localstack_in_ci_1684161347748-push-trigger-input-set
+  identifier: Build_localstack_in_ci_1684161347748pushtriggerinputset
+  orgIdentifier: default
+  projectIdentifier: localstackinci
+  pipeline:
+    identifier: Build_localstack_in_ci_1684161347748
+    properties:
+      ci:
+        codebase:
+          build:
+            type: branch
+            spec:
+              branch: <+trigger.branch>
