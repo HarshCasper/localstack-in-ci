@@ -16,5 +16,7 @@ jobs:
       - name: Run some Tests against LocalStack
         run: |
           awslocal s3 mb s3://test
-          awslocal s3 ls
+          echo "hello world" > /tmp/hello-world
+          awslocal s3 cp /tmp/hello-world s3://test/hello-world
+          awslocal s3 ls s3://test/
           echo "Test Execution complete!"
