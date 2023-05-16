@@ -25,7 +25,7 @@ pipeline:
                   name: localstack
                   identifier: localstack
                   spec:
-                    connectorRef: harnessImage
+                    connectorRef: Docker
                     image: localstack/localstack:latest
                     shell: Sh
               - step:
@@ -33,7 +33,7 @@ pipeline:
                   name: localstack health
                   identifier: localstack_health
                   spec:
-                    connectorRef: harnessImage 
+                    connectorRef: Docker
                     image: curlimages/curl:7.83.1
                     shell: Sh
                     command: until curl --fail --silent --max-time 1 http://localstack:4566/health; do sleep 2; done
