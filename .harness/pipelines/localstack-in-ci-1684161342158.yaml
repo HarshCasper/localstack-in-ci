@@ -39,7 +39,7 @@ pipeline:
                     connectorRef: Docker
                     image: curlimages/curl:7.83.1
                     shell: Sh
-                    command: until curl --fail --silent --max-time 1 http://localstack:4566/_localstack/health; do sleep 2; done
+                    command: until curl --fail --silent --max-time 1 http://localhost:4566/_localstack/health; do sleep 2; done
               - step:
                   type: Run
                   name: Run AWS CLI tests
