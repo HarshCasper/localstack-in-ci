@@ -21,13 +21,16 @@ pipeline:
           execution:
             steps:
               - step:
-                  type: Background
-                  name: localstack
-                  identifier: localstack
+                  type: Run
+                  name: localstack install
+                  identifier: localstack_install
                   spec:
-                    connectorRef: Docker
-                    image: localstack/localstack:latest
                     shell: Sh
+                    command: |
+                      pip install localstack awscli awscli-local[ver1]
+                      docker pull localstack/localstack
+                      localstack start -d
+                      localstack wait -t 30
               - step:
                   type: Run
                   name: localstack health
@@ -36,14 +39,7 @@ pipeline:
                     connectorRef: Docker
                     image: curlimages/curl:7.83.1
                     shell: Sh
-                    command: until curl --fail --silent --max-time 1 http://localstack:4566/health; do sleep 2; done
-              - step:
-                  type: Run
-                  name: Install AWS CLI
-                  identifier: install_aws_cli
-                  spec:
-                    shell: Sh
-                    command: pip install awscli-local[ver1]
+                    command: until curl --fail --silent --max-time 1 http://localstack:4566/_localstack/health; do sleep 2; done
               - step:
                   type: Run
                   name: Run AWS CLI tests
@@ -51,7 +47,7 @@ pipeline:
                   spec:
                     shell: Sh
                     command: |
-                      aws --endpoint http://localhost.localstack.cloud:4566 s3 mb s3://test
+                      awslocal s3 mb s3://test
                       echo "hello world" > /tmp/hello-world
-                      aws --endpoint http://localhost.localstack.cloud:4566 s3 cp /tmp/hello-world s3://test/hello-world
-                      aws --endpoint http://localhost.localstack.cloud:4566 s3 ls s3://test/
+                      awslocal s3 cp /tmp/hello-world s3://test/hello-world
+                      awslocal s3 ls s3://test/
