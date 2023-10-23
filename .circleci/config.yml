@@ -19,7 +19,7 @@ jobs:
             docker pull localstack/localstack-pro
             docker version
             docker ps -a --format '{{json .}}'
-            localstack start -d                       # Start LocalStack in the background
+            $LOCALSTACK_API_KEY localstack start -d                       # Start LocalStack in the background
 
             echo "Waiting for LocalStack startup..."  # Wait 30 seconds for the LocalStack container
             localstack wait -t 30                     # to become ready before timing out 
