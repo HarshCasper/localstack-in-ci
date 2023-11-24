@@ -1,41 +1,23 @@
-version: 2.1
-
+version: '2.1'
 orbs:
-  python: circleci/python@2.0.3
-
-
-
+  localstack: localstack/platform@2.1
 jobs:
-  example-job:
-    machine: # executor type
-      image: ubuntu-2004:2022.04.1
-
+  localstack-test:
+    executor: localstack/default
     steps:
-      - checkout
-
+      - localstack/startup
       - run:
-          name: Start LocalStack
           command: |
-            pip3 install localstack awscli-local[ver1] # install LocalStack cli and awslocal
-            docker version
-            docker ps -a --format '{{json .}}'
-            localstack start -d                       # Start LocalStack in the background
-
-            echo "Waiting for LocalStack startup..."  # Wait 30 seconds for the LocalStack container
-            localstack wait -t 30                     # to become ready before timing out 
-            echo "Startup complete"
-
-      - run:
-          name: Run some Tests against LocalStack
-          command: |
-            awslocal s3 mb s3://test
-            echo "hello world" > /tmp/hello-world
-            awslocal s3 cp /tmp/hello-world s3://test/hello-world
-            awslocal s3 ls s3://test/
-            echo "Test Execution complete!"
-
+            awslocal mq create-broker \
+              --broker-name test-broker \
+              --deployment-mode SINGLE_INSTANCE \
+              --engine-type ACTIVEMQ \
+              --engine-version='5.16.6' \
+              --host-instance-type 'mq.t2.micro' \
+              --auto-minor-version-upgrade \
+              --publicly-accessible \
+              --users='{"ConsoleAccess": true, "Groups": ["testgroup"],"Password": "QXwV*$iUM9USHnVv&!^7s3c@", "Username": "admin"}'
 workflows:
-  version: 2
-  build:
+  localstack-test:
     jobs:
-      - example-job
+      - localstack-test
