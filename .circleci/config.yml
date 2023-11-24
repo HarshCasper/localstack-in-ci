@@ -1,6 +1,7 @@
 version: '2.1'
 orbs:
   localstack: localstack/platform@2.1
+  
 jobs:
   localstack-test:
     executor: localstack/default
