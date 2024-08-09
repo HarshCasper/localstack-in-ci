@@ -1,18 +1,30 @@
-name: localstack-action-example
-on: push
+name: 'Create Preview on Push'
+on:
+  workflow_dispatch:
+  push:
+    branches:
+      - main
+  pull_request:
+    types: [opened, synchronize, reopened]
 jobs:
-  example-job:
+  localstack:
+    permissions: write-all
+    name: Setup LocalStack Preview
     runs-on: ubuntu-latest
     steps:
-      - name: Start LocalStack
-        run: |
-          pip install localstack awscli-local[ver1] # install LocalStack cli and awslocal
-          docker pull localstack/localstack         # Make sure to pull the latest version of the image
-          DOCKER_FLAGS='-e MSSQL_ACCEPT_EULA=Y -e MSSQL_IMAGE=mcr.microsoft.com/mssql/server:2019-latest' localstack start                       # Start LocalStack in the background
-          
-          echo "Waiting for LocalStack startup..."  # Wait 30 seconds for the LocalStack container
-          localstack wait -t 30                     # to become ready before timing out 
-          echo "Startup complete"          
-      - name: Run some Tests against LocalStack
-        run: |
-          awslocal rds create-db-cluster --db-cluster-identifier aurora-mysql-primary-cluster --engine aurora-mysql --engine-version 8.0 --database-name lbcat --master-username test --master-user-password test
+      - name: Checkout
+        uses: actions/checkout@v4
+      - name: LocalStack Preview
+        uses: LocalStack/setup-localstack@config-option
+        with:
+          github-token: ${{ secrets.GITHUB_TOKEN }}
+          state-backend: ephemeral
+          state-action: start
+          include-preview: 'true'
+          install-awslocal: 'true'
+          configuration: 'SERVICES=s3'
+          preview-cmd: |
+            awslocal s3 mb s3://test
+            awslocal sqs create-queue --queue-name test-queue
+        env:
+          LOCALSTACK_API_KEY: ${{ secrets.LOCALSTACK_API_KEY }}
