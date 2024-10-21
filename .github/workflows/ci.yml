@@ -1,11 +1,8 @@
-name: 'Create Preview on Push'
+name: 'Check'
 on:
-  workflow_dispatch:
   push:
     branches:
       - main
-  pull_request:
-    types: [opened, synchronize, reopened]
 jobs:
   localstack:
     permissions: write-all
@@ -14,17 +11,24 @@ jobs:
     steps:
       - name: Checkout
         uses: actions/checkout@v4
-      - name: LocalStack Preview
-        uses: LocalStack/setup-localstack@config-option
+
+      - uses: actions/setup-python@v5
         with:
-          github-token: ${{ secrets.GITHUB_TOKEN }}
-          state-backend: ephemeral
-          state-action: start
-          include-preview: 'true'
+          python-version: '3.10'
+
+      - name: Fixes
+        run: pip install --upgrade "setuptools<75.2.0" plux setuptools-scm
+
+      - name: Setup LocalStack
+        uses: LocalStack/setup-localstack@v0.2.3
+        with:
+          image-tag: 'latest'
           install-awslocal: 'true'
-          ephemeral-configuration: 'PERSISTENCE=1, SERVICES=s3'
-          preview-cmd: |
-            awslocal s3 mb s3://test
-            awslocal sqs create-queue --queue-name test-queue
+        env:
+          LOCALSTACK_API_KEY: ${{ secrets.LOCALSTACK_API_KEY }}
+
+      - name: Run Pro CLI features
+        run: |
+          localstack dns --help
         env:
           LOCALSTACK_API_KEY: ${{ secrets.LOCALSTACK_API_KEY }}
