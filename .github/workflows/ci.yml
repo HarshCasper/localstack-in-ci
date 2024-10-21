@@ -16,16 +16,10 @@ jobs:
         with:
           python-version: '3.10'
 
-      - name: Fixes
-        run: |
-          docker pull localstack/localstack-pro
-          pip install --upgrade "setuptools<75.2.0" plux setuptools-scm
-
       - name: Setup LocalStack
-        uses: LocalStack/setup-localstack@v0.2.3
-        with:
-          image-tag: 'latest'
-          install-awslocal: 'true'
+        run: |
+          pip install --upgrade "setuptools<75.2.0" plux setuptools-scm
+          pip install --no-build-isolation --no-cache --force-reinstall localstack
         env:
           LOCALSTACK_API_KEY: ${{ secrets.LOCALSTACK_API_KEY }}
 
